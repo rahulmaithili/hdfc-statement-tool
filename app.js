@@ -161,8 +161,10 @@ fileInput.addEventListener('change', (e) => {
 });
 
 function handleFile(file) {
-    if (file.type !== 'application/pdf') {
-        alert('Please upload a valid PDF file.');
+    const ext = file.name.split('.').pop().toLowerCase();
+    
+    if (ext !== 'pdf' && ext !== 'csv') {
+        alert('Please upload a valid PDF or CSV bank statement.');
         return;
     }
     
@@ -170,7 +172,100 @@ function handleFile(file) {
     loader.style.display = 'flex';
     dashboard.style.display = 'none';
     
-    parseStatement(file);
+    if (ext === 'pdf') {
+        parseStatement(file);
+    } else {
+        parseCSVStatement(file);
+    }
+}
+
+async function parseCSVStatement(file) {
+    try {
+        loaderText.textContent = "Loading CSV file...";
+        const text = await file.text();
+        
+        loaderText.textContent = "Processing transactions...";
+        const lines = text.split(/\r?\n/);
+        
+        let transactions = [];
+        let parsingStarted = false;
+        let transactionIndex = 0;
+        
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+            
+            const cols = parseCSVLine(line);
+            
+            if (!parsingStarted) {
+                if (cols.includes('Sl. No.') && cols.includes('Transaction Date') && cols.includes('Description')) {
+                    parsingStarted = true;
+                }
+                continue;
+            }
+            
+            if (cols.includes('Closing Balance') || cols.includes('Important Note:') || cols[0].includes('Closing Balance')) {
+                break;
+            }
+            
+            if (cols.length >= 8 && /^\d+$/.test(cols[0])) {
+                const dateStr = cols[1].split(' ')[0];
+                const narration = cols[3];
+                const ref = cols[4];
+                const amt = parseFloat(cols[5].replace(/,/g, ''));
+                const type = cols[6].toUpperCase();
+                const balance = parseFloat(cols[7].replace(/,/g, ''));
+                
+                let w = 0.0;
+                let d = 0.0;
+                if (type === 'DR') {
+                    w = amt;
+                } else if (type === 'CR') {
+                    d = amt;
+                }
+                
+                transactions.push({
+                    id: transactionIndex++,
+                    date: dateStr,
+                    narration: narration,
+                    withdrawal: w,
+                    deposit: d,
+                    balance: balance,
+                    amount: amt,
+                    amtPos: ref,
+                    category: categorizeTransaction(narration)
+                });
+            }
+        }
+        
+        allTransactions = transactions;
+        renderDashboard();
+        
+    } catch (error) {
+        console.error(error);
+        alert("Error reading CSV. Make sure it is a valid Kotak bank statement.");
+        loader.style.display = 'none';
+        uploadSection.style.display = 'block';
+    }
+}
+
+function parseCSVLine(line) {
+    let result = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        if (char === '"') {
+            inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+            result.push(current.trim());
+            current = '';
+        } else {
+            current += char;
+        }
+    }
+    result.push(current.trim());
+    return result;
 }
 
 async function parseStatement(file) {
