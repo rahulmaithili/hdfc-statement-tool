@@ -414,7 +414,10 @@ body:not(.dark) .nav-item {
 
 .pipeline-step {
     flex: 1;
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     padding: 14px 10px;
     font-size: 11px;
     font-weight: 700;
@@ -424,6 +427,12 @@ body:not(.dark) .nav-item {
     transition: all 0.2s ease;
     user-select: none;
     letter-spacing: 0.5px;
+}
+
+.pipeline-step i {
+    width: 15px;
+    height: 15px;
+    stroke-width: 2.5px;
 }
 
 /* Chevron arrows using clip-path for maximum compatibility and precision */
@@ -461,22 +470,45 @@ body:not(.dark) .nav-item {
     background-color: rgba(83, 58, 253, 0.04);
 }
 
-.pipeline-step.active {
-    background-color: var(--color-ink-secondary);
-    color: white;
+/* Individual active step colors for multicolored pipeline */
+.pipeline-step.step-all.active {
+    background-color: #64748b !important;
+    color: white !important;
+}
+.pipeline-step.step-all.active:not(:last-child)::after {
+    background-color: #64748b !important;
 }
 
-.pipeline-step.active:not(:last-child)::after {
-    background-color: var(--color-ink-secondary);
+.pipeline-step.step-upi.active {
+    background-color: #8b5cf6 !important;
+    color: white !important;
+}
+.pipeline-step.step-upi.active:not(:last-child)::after {
+    background-color: #8b5cf6 !important;
 }
 
-body.dark .pipeline-step.active {
-    background-color: var(--color-primary);
-    color: white;
+.pipeline-step.step-electricity.active {
+    background-color: #d97706 !important;
+    color: white !important;
+}
+.pipeline-step.step-electricity.active:not(:last-child)::after {
+    background-color: #d97706 !important;
 }
 
-body.dark .pipeline-step.active:not(:last-child)::after {
-    background-color: var(--color-primary);
+.pipeline-step.step-shopping.active {
+    background-color: #db2777 !important;
+    color: white !important;
+}
+.pipeline-step.step-shopping.active:not(:last-child)::after {
+    background-color: #db2777 !important;
+}
+
+.pipeline-step.step-gas.active {
+    background-color: #ea580c !important;
+    color: white !important;
+}
+.pipeline-step.step-gas.active:not(:last-child)::after {
+    background-color: #ea580c !important;
 }
 
 /* Charts Grid */

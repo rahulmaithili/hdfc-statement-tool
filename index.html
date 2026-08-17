@@ -158,11 +158,26 @@
                     <div id="tab-ledger" class="tab-page" style="display: none;">
                         <!-- Chevron Pipeline Filter -->
                         <div class="pipeline-selector-bar">
-                            <div class="pipeline-step active" data-filter="all">ALL TRANSACTIONS</div>
-                            <div class="pipeline-step" data-filter="upi">UPI PAYMENTS</div>
-                            <div class="pipeline-step" data-filter="bank">BANK TRANSFERS</div>
-                            <div class="pipeline-step" data-filter="gas">SHIV SHAKTI (HP GAS)</div>
-                            <div class="pipeline-step" data-filter="charges">BANK CHARGES</div>
+                            <div class="pipeline-step active step-all" data-filter="all" title="All Transactions">
+                                <i data-lucide="database"></i>
+                                <span>All</span>
+                            </div>
+                            <div class="pipeline-step step-upi" data-filter="upi" title="UPI Payments">
+                                <i data-lucide="smartphone"></i>
+                                <span>UPI</span>
+                            </div>
+                            <div class="pipeline-step step-electricity" data-filter="electricity" title="Electricity Bills (NBPDCL)">
+                                <i data-lucide="zap"></i>
+                                <span>Electric</span>
+                            </div>
+                            <div class="pipeline-step step-shopping" data-filter="shopping" title="Shopping / Cashbacks">
+                                <i data-lucide="shopping-bag"></i>
+                                <span>Shopping</span>
+                            </div>
+                            <div class="pipeline-step step-gas" data-filter="gas" title="Shiv Shakti HP Gas">
+                                <i data-lucide="flame"></i>
+                                <span>HP Gas</span>
+                            </div>
                         </div>
 
                         <div class="transactions-section card">
@@ -210,9 +225,10 @@
 
                     <!-- PAGE: DIRECTORY -->
                     <div id="tab-directory" class="tab-page" style="display: none;">
-                        <div class="charts-grid">
+                        <h2 class="mobile-section-header" style="margin-bottom: 16px; font-size: 18px; font-weight: 600; color: var(--color-ink);">Received Directories (Kahan se paise aaye)</h2>
+                        <div class="charts-grid" style="margin-bottom: 32px;">
                             <div class="chart-card card">
-                                <h3>Top 5 Senders (Most Received From)</h3>
+                                <h3>Top Senders (By Total Amount Received)</h3>
                                 <div class="table-container subdued-table">
                                     <table>
                                         <thead>
@@ -222,12 +238,31 @@
                                                 <th class="text-right">Transactions</th>
                                             </tr>
                                         </thead>
-                                        <tbody id="topSendersBody"></tbody>
+                                        <tbody id="topSendersAmountBody"></tbody>
                                     </table>
                                 </div>
                             </div>
                             <div class="chart-card card">
-                                <h3>Top 5 People You Sent Money To (Most Sent)</h3>
+                                <h3>Most Frequent Senders (By Number of Times Received)</h3>
+                                <div class="table-container subdued-table">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Sender Name</th>
+                                                <th class="text-right">Total Received</th>
+                                                <th class="text-right">Frequency</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="topSendersCountBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h2 class="mobile-section-header" style="margin-bottom: 16px; font-size: 18px; font-weight: 600; color: var(--color-ink);">Paid Directories (Kisko sabse jyada paise bheje)</h2>
+                        <div class="charts-grid">
+                            <div class="chart-card card">
+                                <h3>Top Recipients (By Total Amount Paid)</h3>
                                 <div class="table-container subdued-table">
                                     <table>
                                         <thead>
@@ -237,7 +272,22 @@
                                                 <th class="text-right">Transactions</th>
                                             </tr>
                                         </thead>
-                                        <tbody id="topRecipientsBody"></tbody>
+                                        <tbody id="topRecipientsAmountBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="chart-card card">
+                                <h3>Most Frequent Recipients (By Number of Times Paid)</h3>
+                                <div class="table-container subdued-table">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Recipient Name</th>
+                                                <th class="text-right">Total Sent</th>
+                                                <th class="text-right">Frequency</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="topRecipientsCountBody"></tbody>
                                     </table>
                                 </div>
                             </div>

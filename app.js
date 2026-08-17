@@ -46,9 +46,10 @@ const exportAllBtn = document.getElementById('exportAllBtn');
 const exportFilteredBtn = document.getElementById('exportFilteredBtn');
 const pipelineSteps = document.querySelectorAll('.pipeline-step');
 
-// Directory & Pipeline Elements
-const topSendersBody = document.getElementById('topSendersBody');
-const topRecipientsBody = document.getElementById('topRecipientsBody');
+const topSendersAmountBody = document.getElementById('topSendersAmountBody');
+const topSendersCountBody = document.getElementById('topSendersCountBody');
+const topRecipientsAmountBody = document.getElementById('topRecipientsAmountBody');
+const topRecipientsCountBody = document.getElementById('topRecipientsCountBody');
 const pipeInflow = document.getElementById('pipeInflow');
 const pipeLedger = document.getElementById('pipeLedger');
 const pipeOutflow = document.getElementById('pipeOutflow');
@@ -475,17 +476,23 @@ function processLines(lines) {
 function categorizeTransaction(narration) {
     const text = narration.toUpperCase();
     // Added specific check for Shiv Shakti / HP Gas
-    if (text.includes('SHIV SHAKTI') || text.includes('SHIVSHAKTI') || text.includes('HPGAS') || text.includes('GASAGENCY')) {
+    if (text.includes('SHIV SHAKTI') || text.includes('SHIVSHAKTI') || text.includes('HPGAS') || text.includes('GASAGENCY') || text.includes('LPG GAS')) {
         return 'Shiv Shakti (HP Gas)';
     }
+    if (text.includes('NBPDCL') || text.includes('ELECTRIC') || text.includes('POWER') || text.includes('ENERGY')) {
+        return 'Electricity';
+    }
+    if (text.includes('AMAZON') || text.includes('FLIPKART') || text.includes('RELIANCE RETAIL') || text.includes('ARVIND LIFEST') || text.includes('SNEAKERS') || text.includes('MEESHO') || text.includes('SHOPPING') || text.includes('RETAIL') || text.includes('USHA GLAXY')) {
+        return 'Shopping';
+    }
+    if (text.includes('CASHBACK')) return 'Interest Received';
     if (text.includes('UPI')) return 'UPI Transfer';
     if (text.includes('ATM') || text.includes('CASH')) return 'Cash Withdrawal';
     if (text.includes('NEFT') || text.includes('RTGS') || text.includes('IMPS')) return 'Bank Transfer';
-    if (text.includes('POS') || text.includes('PURCHASE')) return 'Card Swipe';
-    if (text.includes('CHRG') || text.includes('FEE') || text.includes('GST')) return 'Bank Charges';
+    if (text.includes('POS') || text.includes('PURCHASE') || text.includes('PCD/')) return 'Card Swipe';
+    if (text.includes('CHRG') || text.includes('FEE') || text.includes('GST') || text.includes('TAX')) return 'Bank Charges';
     if (text.includes('INT') && text.includes('PD')) return 'Interest Received';
     if (text.includes('ZOMATO') || text.includes('SWIGGY')) return 'Food & Dining';
-    if (text.includes('AMAZON') || text.includes('FLIPKART')) return 'Shopping';
     return 'Other';
 }
 
@@ -598,57 +605,114 @@ function renderDashboard() {
         }
     });
     
-    const sortedSenders = Object.keys(senders).map(name => ({
+    const sortedSendersByAmount = Object.keys(senders).map(name => ({
         name: name,
         amount: senders[name].amount,
         count: senders[name].count
     })).sort((a, b) => b.amount - a.amount).slice(0, 5);
-    
-    const sortedRecipients = Object.keys(recipients).map(name => ({
+
+    const sortedSendersByCount = Object.keys(senders).map(name => ({
+        name: name,
+        amount: senders[name].amount,
+        count: senders[name].count
+    })).sort((a, b) => b.count - a.count).slice(0, 5);
+
+    const sortedRecipientsByAmount = Object.keys(recipients).map(name => ({
         name: name,
         amount: recipients[name].amount,
         count: recipients[name].count
     })).sort((a, b) => b.amount - a.amount).slice(0, 5);
-    
-    // Render Senders
-    topSendersBody.innerHTML = '';
-    sortedSenders.forEach(item => {
-        const row = document.createElement('tr');
-        row.style.cursor = 'pointer';
-        row.title = `Click to filter transactions for ${item.name}`;
-        row.innerHTML = `
-            <td><strong>${item.name}</strong></td>
-            <td class="text-right num-val d-val">${formatCurrency(item.amount)}</td>
-            <td class="text-right num-val" style="color: var(--color-ink-mute); font-size: 12px;">${item.count} txns</td>
-        `;
-        row.addEventListener('click', () => {
-            // Switch to Ledger page first
-            document.querySelector('[data-tab="ledger"]').click();
-            searchInput.value = item.name;
-            filterAndRenderTable();
+
+    const sortedRecipientsByCount = Object.keys(recipients).map(name => ({
+        name: name,
+        amount: recipients[name].amount,
+        count: recipients[name].count
+    })).sort((a, b) => b.count - a.count).slice(0, 5);
+
+    // Render Senders by Amount
+    if (topSendersAmountBody) {
+        topSendersAmountBody.innerHTML = '';
+        sortedSendersByAmount.forEach(item => {
+            const row = document.createElement('tr');
+            row.style.cursor = 'pointer';
+            row.title = `Click to filter transactions for ${item.name}`;
+            row.innerHTML = `
+                <td><strong>${item.name}</strong></td>
+                <td class="text-right num-val d-val">${formatCurrency(item.amount)}</td>
+                <td class="text-right num-val" style="color: var(--color-ink-mute); font-size: 12px;">${item.count} txns</td>
+            `;
+            row.addEventListener('click', () => {
+                document.querySelector('[data-tab="ledger"]').click();
+                searchInput.value = item.name;
+                filterAndRenderTable();
+            });
+            topSendersAmountBody.appendChild(row);
         });
-        topSendersBody.appendChild(row);
-    });
-    
-    // Render Recipients
-    topRecipientsBody.innerHTML = '';
-    sortedRecipients.forEach(item => {
-        const row = document.createElement('tr');
-        row.style.cursor = 'pointer';
-        row.title = `Click to filter transactions for ${item.name}`;
-        row.innerHTML = `
-            <td><strong>${item.name}</strong></td>
-            <td class="text-right num-val w-val">${formatCurrency(item.amount)}</td>
-            <td class="text-right num-val" style="color: var(--color-ink-mute); font-size: 12px;">${item.count} txns</td>
-        `;
-        row.addEventListener('click', () => {
-            document.querySelector('[data-tab="ledger"]').click();
-            searchInput.value = item.name;
-            filterAndRenderTable();
+    }
+
+    // Render Senders by Count
+    if (topSendersCountBody) {
+        topSendersCountBody.innerHTML = '';
+        sortedSendersByCount.forEach(item => {
+            const row = document.createElement('tr');
+            row.style.cursor = 'pointer';
+            row.title = `Click to filter transactions for ${item.name}`;
+            row.innerHTML = `
+                <td><strong>${item.name}</strong></td>
+                <td class="text-right num-val d-val">${formatCurrency(item.amount)}</td>
+                <td class="text-right num-val" style="font-weight: 600; color: var(--color-primary);">${item.count} times</td>
+            `;
+            row.addEventListener('click', () => {
+                document.querySelector('[data-tab="ledger"]').click();
+                searchInput.value = item.name;
+                filterAndRenderTable();
+            });
+            topSendersCountBody.appendChild(row);
         });
-        topRecipientsBody.appendChild(row);
-    });
-    
+    }
+
+    // Render Recipients by Amount
+    if (topRecipientsAmountBody) {
+        topRecipientsAmountBody.innerHTML = '';
+        sortedRecipientsByAmount.forEach(item => {
+            const row = document.createElement('tr');
+            row.style.cursor = 'pointer';
+            row.title = `Click to filter transactions for ${item.name}`;
+            row.innerHTML = `
+                <td><strong>${item.name}</strong></td>
+                <td class="text-right num-val w-val">${formatCurrency(item.amount)}</td>
+                <td class="text-right num-val" style="color: var(--color-ink-mute); font-size: 12px;">${item.count} txns</td>
+            `;
+            row.addEventListener('click', () => {
+                document.querySelector('[data-tab="ledger"]').click();
+                searchInput.value = item.name;
+                filterAndRenderTable();
+            });
+            topRecipientsAmountBody.appendChild(row);
+        });
+    }
+
+    // Render Recipients by Count
+    if (topRecipientsCountBody) {
+        topRecipientsCountBody.innerHTML = '';
+        sortedRecipientsByCount.forEach(item => {
+            const row = document.createElement('tr');
+            row.style.cursor = 'pointer';
+            row.title = `Click to filter transactions for ${item.name}`;
+            row.innerHTML = `
+                <td><strong>${item.name}</strong></td>
+                <td class="text-right num-val w-val">${formatCurrency(item.amount)}</td>
+                <td class="text-right num-val" style="font-weight: 600; color: #dc2626;">${item.count} times</td>
+            `;
+            row.addEventListener('click', () => {
+                document.querySelector('[data-tab="ledger"]').click();
+                searchInput.value = item.name;
+                filterAndRenderTable();
+            });
+            topRecipientsCountBody.appendChild(row);
+        });
+    }
+
     // Render Savings Pipeline values
     pipeInflow.textContent = formatCurrency(totalIncome);
     pipeLedger.textContent = formatCurrency(totalIncome);
@@ -903,8 +967,10 @@ removePdf.addEventListener('click', () => {
         if (pipelineSteps.length > 0) pipelineSteps[0].classList.add('active');
     }
     topCategoriesBody.innerHTML = '';
-    topSendersBody.innerHTML = '';
-    topRecipientsBody.innerHTML = '';
+    if (topSendersAmountBody) topSendersAmountBody.innerHTML = '';
+    if (topSendersCountBody) topSendersCountBody.innerHTML = '';
+    if (topRecipientsAmountBody) topRecipientsAmountBody.innerHTML = '';
+    if (topRecipientsCountBody) topRecipientsCountBody.innerHTML = '';
     transactionsBody.innerHTML = '';
     
     dashboard.style.display = 'none';
@@ -975,14 +1041,14 @@ pipelineSteps.forEach(step => {
         } else if (filterVal === 'upi') {
             categoryFilter.value = 'UPI Transfer';
             searchInput.value = '';
-        } else if (filterVal === 'bank') {
-            categoryFilter.value = 'Bank Transfer';
+        } else if (filterVal === 'electricity') {
+            categoryFilter.value = 'Electricity';
+            searchInput.value = '';
+        } else if (filterVal === 'shopping') {
+            categoryFilter.value = 'Shopping';
             searchInput.value = '';
         } else if (filterVal === 'gas') {
             categoryFilter.value = 'Shiv Shakti (HP Gas)';
-            searchInput.value = '';
-        } else if (filterVal === 'charges') {
-            categoryFilter.value = 'Bank Charges';
             searchInput.value = '';
         }
         
