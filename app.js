@@ -575,9 +575,15 @@ function renderDashboard() {
     
     topCategoriesBody.innerHTML = '';
     sortedCategories.forEach(item => {
+        const iconName = getCategoryIcon(item.name);
         topCategoriesBody.innerHTML += `
             <tr>
-                <td><strong>${item.name}</strong></td>
+                <td>
+                    <span style="display: inline-flex; align-items: center; gap: 8px;">
+                        <i data-lucide="${iconName}" style="width: 14px; height: 14px; color: var(--color-ink-mute); flex-shrink: 0;"></i>
+                        <strong>${item.name}</strong>
+                    </span>
+                </td>
                 <td class="text-right num-val w-val">${formatCurrency(item.amount)}</td>
                 <td class="text-right num-val">${item.pct}%</td>
             </tr>
@@ -1055,3 +1061,18 @@ pipelineSteps.forEach(step => {
         filterAndRenderTable();
     });
 });
+
+function getCategoryIcon(catName) {
+    const name = catName.toLowerCase();
+    if (name.includes('upi')) return 'smartphone';
+    if (name.includes('gas') || name.includes('shiv shakti')) return 'flame';
+    if (name.includes('electricity') || name.includes('electric')) return 'zap';
+    if (name.includes('shopping')) return 'shopping-bag';
+    if (name.includes('charges')) return 'alert-circle';
+    if (name.includes('cash') || name.includes('atm')) return 'dollar-sign';
+    if (name.includes('bank transfer') || name.includes('transfer')) return 'arrow-right-left';
+    if (name.includes('card swipe') || name.includes('swipe')) return 'credit-card';
+    if (name.includes('interest')) return 'trending-up';
+    if (name.includes('food') || name.includes('dining')) return 'utensils';
+    return 'layers';
+}
