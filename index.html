@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HDFC Bank Statement Analyzer - Premium</title>
+    <!-- ApexCharts CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <!-- pdf.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="stripe-bg-gradient"></div>
+
+    <!-- App Container -->
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <i data-lucide="wallet" class="brand-icon"></i>
+                <span>HDFC Analyzer</span>
+                <button id="sidebarClose" class="sidebar-close-btn" style="display: none;" title="Close Sidebar">
+                    <i data-lucide="chevron-left" style="width: 18px; height: 18px;"></i>
+                </button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-tab="overview" title="Overview">
+                    <i data-lucide="layout-dashboard" class="nav-icon"></i>
+                    <span>Overview</span>
+                </button>
+                <button class="nav-item" data-tab="ledger" title="Ledger List">
+                    <i data-lucide="file-text" class="nav-icon"></i>
+                    <span>Ledger List</span>
+                </button>
+                <button class="nav-item" data-tab="directory" title="Directory">
+                    <i data-lucide="users" class="nav-icon"></i>
+                    <span>Directory</span>
+                </button>
+                <button class="nav-item" data-tab="pipeline" title="Savings Pipeline">
+                    <i data-lucide="git-branch" class="nav-icon"></i>
+                    <span>Savings Pipeline</span>
+                </button>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <span class="badge badge-other">v2.0 Premium</span>
+            </div>
+        </aside>
+
+        <!-- Main View Area -->
+        <div class="main-viewport">
+            <header class="header">
+                <div class="header-container">
+                    <div class="header-title-area" style="display: flex; align-items: center; gap: 12px;">
+                        <button id="sidebarToggle" class="btn-ctrl sidebar-toggle" title="Toggle Sidebar" style="padding: 8px;">
+                            <i data-lucide="menu" style="width: 20px; height: 20px;"></i>
+                        </button>
+                        <h1 id="pageTitle" style="margin: 0;">Overview</h1>
+                    </div>
+                    
+                    <div class="header-actions">
+                        <button id="themeToggle" class="btn-ctrl theme-toggle-btn" title="Toggle Theme">
+                            <i data-lucide="sun" class="sun-icon"></i>
+                            <i data-lucide="moon" class="moon-icon" style="display: none;"></i>
+                        </button>
+                        <button id="printBtn" class="btn-ctrl" title="Print statement insights" style="display: none;">
+                            <i data-lucide="printer"></i>
+                            <span>Print</span>
+                        </button>
+                        <button id="removePdf" class="btn-ctrl btn-remove" title="Remove PDF" style="display: none;">
+                            <i data-lucide="x"></i>
+                            <span>Close File</span>
+                        </button>
+                        <div class="header-meta">Secure & Offline</div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="main-content">
+                <!-- Dropzone Section -->
+                <section id="uploadSection" class="upload-section card">
+                    <div id="dropzone" class="dropzone">
+                        <div class="dropzone-content">
+                            <i data-lucide="upload-cloud" class="upload-icon"></i>
+                            <h3>Drag & drop your HDFC statement PDF</h3>
+                            <p>Or click to browse files from your computer</p>
+                            <input type="file" id="fileInput" accept=".pdf" style="display: none;">
+                        </div>
+                    </div>
+                    <div id="loader" class="loader-container" style="display: none;">
+                        <div class="spinner"></div>
+                        <p id="loaderText">Parsing PDF pages...</p>
+                    </div>
+                </section>
+
+                <!-- Page Contents (Hidden until statement parsed) -->
+                <div id="dashboard" style="display: none;">
+                    
+                    <!-- PAGE: OVERVIEW -->
+                    <div id="tab-overview" class="tab-page">
+                        <!-- Metrics Row -->
+                        <div class="metrics-grid">
+                            <div class="metric-card card metric-income">
+                                <span class="metric-label">Total Deposits</span>
+                                <div class="metric-value" id="totalIncome">₹0.00</div>
+                                <span class="metric-sub" id="incomeCount">0 transactions</span>
+                            </div>
+                            <div class="metric-card card metric-expense">
+                                <span class="metric-label">Total Withdrawals</span>
+                                <div class="metric-value" id="totalExpenses">₹0.00</div>
+                                <span class="metric-sub" id="expenseCount">0 transactions</span>
+                            </div>
+                            <div class="metric-card card metric-savings">
+                                <span class="metric-label">Net Savings</span>
+                                <div class="metric-value" id="netSavings">₹0.00</div>
+                                <span class="metric-sub">Account ledger balance margin</span>
+                            </div>
+                            <div class="metric-card card metric-rate">
+                                <span class="metric-label">Savings Rate</span>
+                                <div class="metric-value" id="savingsRate">0%</div>
+                                <span class="metric-sub">Efficiency score of inflow</span>
+                            </div>
+                        </div>
+
+                        <!-- Charts Section -->
+                        <div class="charts-grid">
+                            <div class="chart-card card">
+                                <h3>Expenses by Category</h3>
+                                <div id="categoryChart"></div>
+                            </div>
+                            <div class="chart-card card">
+                                <h3>Top Expense Categories</h3>
+                                <div class="table-container subdued-table">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Category</th>
+                                                <th class="text-right">Amount</th>
+                                                <th class="text-right">Percentage</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="topCategoriesBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PAGE: LEDGER -->
+                    <div id="tab-ledger" class="tab-page" style="display: none;">
+                        <!-- Chevron Pipeline Filter -->
+                        <div class="pipeline-selector-bar">
+                            <div class="pipeline-step active" data-filter="all">ALL TRANSACTIONS</div>
+                            <div class="pipeline-step" data-filter="upi">UPI PAYMENTS</div>
+                            <div class="pipeline-step" data-filter="bank">BANK TRANSFERS</div>
+                            <div class="pipeline-step" data-filter="gas">SHIV SHAKTI (HP GAS)</div>
+                            <div class="pipeline-step" data-filter="charges">BANK CHARGES</div>
+                        </div>
+
+                        <div class="transactions-section card">
+                            <div class="section-header">
+                                <div class="table-actions">
+                                    <input type="text" id="searchInput" placeholder="Search narration..." class="search-input">
+                                    <select id="categoryFilter" class="filter-select">
+                                        <option value="all">All Categories</option>
+                                    </select>
+                                    <button id="batchDeleteBtn" class="btn-ctrl btn-remove" style="display: none;">
+                                        Delete Selected
+                                    </button>
+                                    <button id="batchExportBtn" class="btn-ctrl" style="display: none; background-color: var(--color-primary); color: white;">
+                                        Export Selected CSV
+                                    </button>
+                                    <button id="exportAllBtn" class="btn-ctrl" title="Download all transactions for Excel" style="margin-left: auto; display: none;">
+                                        <i data-lucide="download"></i>
+                                        <span>Export All (Excel)</span>
+                                    </button>
+                                    <button id="exportFilteredBtn" class="btn-ctrl" title="Download filtered transactions for Excel" style="display: none;">
+                                        <i data-lucide="download-cloud"></i>
+                                        <span>Export Filtered (Excel)</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="table-container main-table">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 40px;"><input type="checkbox" id="selectAllCheckbox"></th>
+                                            <th>Date</th>
+                                            <th>Narration</th>
+                                            <th>Category</th>
+                                            <th class="text-right">Withdrawal</th>
+                                            <th class="text-right">Deposit</th>
+                                            <th class="text-right">Balance</th>
+                                            <th class="text-center" style="width: 80px;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="transactionsBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PAGE: DIRECTORY -->
+                    <div id="tab-directory" class="tab-page" style="display: none;">
+                        <div class="charts-grid">
+                            <div class="chart-card card">
+                                <h3>Top 5 Senders (Most Received From)</h3>
+                                <div class="table-container subdued-table">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Sender Name</th>
+                                                <th class="text-right">Total Received</th>
+                                                <th class="text-right">Transactions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="topSendersBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="chart-card card">
+                                <h3>Top 5 People You Sent Money To (Most Sent)</h3>
+                                <div class="table-container subdued-table">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Recipient Name</th>
+                                                <th class="text-right">Total Sent</th>
+                                                <th class="text-right">Transactions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="topRecipientsBody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PAGE: PIPELINE -->
+                    <div id="tab-pipeline" class="tab-page" style="display: none;">
+                        <div class="card pipeline-card">
+                            <h3>Financial Savings Flow (Pipeline)</h3>
+                            <p class="pipeline-desc">Visual flowchart of funds flowing through your account.</p>
+                            
+                            <div class="pipeline-flow-container">
+                                <!-- Step 1: Inflow -->
+                                <div class="flow-column">
+                                    <div class="flow-header">Inflow (Incoming)</div>
+                                    <div class="flow-box inflow-box">
+                                        <span class="flow-box-title">Total Deposits</span>
+                                        <span class="flow-box-val" id="pipeInflow">₹0.00</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="flow-connector">
+                                    <div class="connector-line"></div>
+                                </div>
+                                
+                                <!-- Step 2: Intermediate processing -->
+                                <div class="flow-column">
+                                    <div class="flow-header">Account Ledger</div>
+                                    <div class="flow-box ledger-box">
+                                        <span class="flow-box-title">Processed Funds</span>
+                                        <span class="flow-box-val" id="pipeLedger">₹0.00</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="flow-connector">
+                                    <div class="connector-line branch-line"></div>
+                                </div>
+                                
+                                <!-- Step 3: Outflow & Savings -->
+                                <div class="flow-column">
+                                    <div class="flow-header">Outflow (Distribution)</div>
+                                    
+                                    <div class="flow-box outflow-box">
+                                        <span class="flow-box-title">Expenses (Outflow)</span>
+                                        <span class="flow-box-val" id="pipeOutflow">₹0.00</span>
+                                    </div>
+                                    <div class="flow-box savings-box">
+                                        <span class="flow-box-title">Net Savings</span>
+                                        <span class="flow-box-val" id="pipeSavings">₹0.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Details View Modal -->
+    <div id="detailsModal" class="modal-backdrop" style="display: none;">
+        <div class="modal-card card">
+            <div class="modal-header">
+                <h3>Transaction details</h3>
+                <button id="closeModalBtn" class="modal-close-btn"><i data-lucide="x"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-row">
+                    <span class="detail-label">Date:</span>
+                    <span class="detail-val" id="detailDate">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Narration:</span>
+                    <span class="detail-val text-bold" id="detailNarration">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Category:</span>
+                    <span class="detail-val" id="detailCategory">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Ref No:</span>
+                    <span class="detail-val" id="detailRef">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Transaction Type:</span>
+                    <span class="detail-val" id="detailType">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Amount:</span>
+                    <span class="detail-val text-bold" id="detailAmount">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Closing Balance:</span>
+                    <span class="detail-val" id="detailBalance">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Quick Access Bottom Navigation -->
+    <div class="mobile-bottom-nav" id="mobileBottomNav">
+        <button class="mobile-nav-item active" data-tab="overview">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Overview</span>
+        </button>
+        <button class="mobile-nav-item" data-tab="ledger">
+            <i data-lucide="file-text"></i>
+            <span>Ledger</span>
+        </button>
+        <button class="mobile-nav-item" data-tab="directory">
+            <i data-lucide="users"></i>
+            <span>Directory</span>
+        </button>
+        <button class="mobile-nav-item" data-tab="pipeline">
+            <i data-lucide="git-branch"></i>
+            <span>Pipeline</span>
+        </button>
+    </div>
+
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
