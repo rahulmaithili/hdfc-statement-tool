@@ -470,7 +470,14 @@ body:not(.dark) .nav-item {
     background-color: rgba(83, 58, 253, 0.04);
 }
 
-/* Individual active step colors for multicolored pipeline */
+/* Individual active step colors for multicolored pipeline (Light Mode default) */
+.pipeline-step.step-all {
+    background-color: rgba(100, 116, 139, 0.07);
+    color: #475569;
+}
+.pipeline-step.step-all:not(:last-child)::after {
+    background-color: rgba(100, 116, 139, 0.07);
+}
 .pipeline-step.step-all.active {
     background-color: #64748b !important;
     color: white !important;
@@ -479,6 +486,13 @@ body:not(.dark) .nav-item {
     background-color: #64748b !important;
 }
 
+.pipeline-step.step-upi {
+    background-color: rgba(139, 92, 246, 0.07);
+    color: #6d28d9;
+}
+.pipeline-step.step-upi:not(:last-child)::after {
+    background-color: rgba(139, 92, 246, 0.07);
+}
 .pipeline-step.step-upi.active {
     background-color: #8b5cf6 !important;
     color: white !important;
@@ -487,6 +501,13 @@ body:not(.dark) .nav-item {
     background-color: #8b5cf6 !important;
 }
 
+.pipeline-step.step-electricity {
+    background-color: rgba(217, 119, 6, 0.07);
+    color: #b45309;
+}
+.pipeline-step.step-electricity:not(:last-child)::after {
+    background-color: rgba(217, 119, 6, 0.07);
+}
 .pipeline-step.step-electricity.active {
     background-color: #d97706 !important;
     color: white !important;
@@ -495,6 +516,13 @@ body:not(.dark) .nav-item {
     background-color: #d97706 !important;
 }
 
+.pipeline-step.step-shopping {
+    background-color: rgba(219, 39, 119, 0.07);
+    color: #be185d;
+}
+.pipeline-step.step-shopping:not(:last-child)::after {
+    background-color: rgba(219, 39, 119, 0.07);
+}
 .pipeline-step.step-shopping.active {
     background-color: #db2777 !important;
     color: white !important;
@@ -503,12 +531,60 @@ body:not(.dark) .nav-item {
     background-color: #db2777 !important;
 }
 
+.pipeline-step.step-gas {
+    background-color: rgba(234, 88, 12, 0.07);
+    color: #c2410c;
+}
+.pipeline-step.step-gas:not(:last-child)::after {
+    background-color: rgba(234, 88, 12, 0.07);
+}
 .pipeline-step.step-gas.active {
     background-color: #ea580c !important;
     color: white !important;
 }
 .pipeline-step.step-gas.active:not(:last-child)::after {
     background-color: #ea580c !important;
+}
+
+/* Multicolored pipeline (Dark Mode overrides) */
+body.dark .pipeline-step.step-all {
+    background-color: rgba(148, 163, 184, 0.12);
+    color: #cbd5e1;
+}
+body.dark .pipeline-step.step-all:not(:last-child)::after {
+    background-color: rgba(148, 163, 184, 0.12);
+}
+
+body.dark .pipeline-step.step-upi {
+    background-color: rgba(167, 139, 250, 0.12);
+    color: #ddd6fe;
+}
+body.dark .pipeline-step.step-upi:not(:last-child)::after {
+    background-color: rgba(167, 139, 250, 0.12);
+}
+
+body.dark .pipeline-step.step-electricity {
+    background-color: rgba(251, 191, 36, 0.12);
+    color: #fde68a;
+}
+body.dark .pipeline-step.step-electricity:not(:last-child)::after {
+    background-color: rgba(251, 191, 36, 0.12);
+}
+
+body.dark .pipeline-step.step-shopping {
+    background-color: rgba(244, 114, 182, 0.12);
+    color: #fbcfe8;
+}
+body.dark .pipeline-step.step-shopping:not(:last-child)::after {
+    background-color: rgba(244, 114, 182, 0.12);
+}
+
+body.dark .pipeline-step.step-gas {
+    background-color: rgba(251, 146, 60, 0.12);
+    color: #fed7aa;
+}
+body.dark .pipeline-step.step-gas:not(:last-child)::after {
+    background-color: rgba(251, 146, 60, 0.12);
 }
 
 /* Charts Grid */
